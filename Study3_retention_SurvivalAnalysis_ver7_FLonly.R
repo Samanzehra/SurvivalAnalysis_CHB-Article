@@ -27,14 +27,12 @@ str(rawdata)
 summary(rawdata)
 LD <- read.csv("FL_LDwithQuiz.csv", fileEncoding = 'UTF-8-BOM')
 
-
 summary(LD)
 LD_act <- LD[,3:6]
 cor(LD_act)
 IQR(LD_act$A)
 range(LD$A)
 boxplot(LD$A, LD$D, LD$V, LD$Q)#, horizontal = TRUE
-
 
 #boxplot(rawdata$A, rawdata$D, rawdata$V, rawdata$Q, horizontal = TRUE)
 table(rawdata$Course)
@@ -214,8 +212,6 @@ prop.table(table(rawdata$region))
 table(rawdata$Course, rawdata$cc, rawdata$sec)
 #write.csv(table(rawdata$Course, rawdata$cc, rawdata$sec), file = "table&fig/CC&SECinCourses.csv")
 
-
-
 rawdata$sec
 ################################ Interaction terms #############################
 cox_interact <- coxph(Surv(prc_act_count, prc_act_count >1) ~  nA*cc*sec + nV*cc*sec + nD*cc*sec + nQ*cc*sec, data = rawdata)#, subset = ccS =="SA")#, subset = ccS =="AF") #subset = secS =="4" )# subset = SocioEco=="HI")# subset = secS =="4" )# ,subset = ccS=="GE") #, subset = SocioEco=="LOW")
@@ -226,47 +222,22 @@ AIC(cox_interact)
 #nA:ccS:secS + nV:ccS:secS + nD:ccS:secS + nQ:ccS:secS # nA*ccS*secS + nV*ccS*secS + nD*ccS*secS + nQ*ccS*secS
 cox.zph(cox_interact, transform="identity") # identity means no transformation on time; time=time (default was KM transformation, another was rank which ranks the time and then measure propotional hazard)
 cox_interact$coefficients
-# 
+ 
 # ###################### using glmnet ############################################
-# 
-# data <- as.data.frame(rawdata)
-# 
-# library(glmnet)
-# load("CoxExample.RData")
-# CoxData <- get(load("CoxExample.RData"))
-# write.csv(CoxData, "CoxData.csv", row.names = FALSE)
-# y[1:5,]
-# x[1:5,]
-# fit = glmnet(x, y, family = "cox")# , alpha=1)
-# plot(fit)
-# # we can extract the coefficients at certain values of ??.
-# coef(fit, s = 0.05)
-# cvfit = cv.glmnet(x, y, family = "cox")
-# plot(cvfit)
-# cvfit$lambda.min
-# cvfit$lambda.1se
-# # We can check the active covariates in our model and see their coefficients.
-# coef.min = coef(cvfit, s = "lambda.min")
-# coef.min
-# active.min = which(coef.min != 0)
-# index.min = coef.min[active.min]
-# index.min
-# 
-# 
-# ######################################################################################################################
-# dat <- rawdata %>% dplyr::select(nA, nV, nD, nQ) # , D, lengthW, secS
-# head(dat)
-# X <- as.matrix(dat)
-# head(X)
-# rawdata$time <- rawdata %>% dplyr::select(prc_act_count) # , D, lengthW, secS
-# rawdata$status <- rawdata %>% dplyr::select(event) # , D, lengthW, secS
-# Y <- rawdata %>% dplyr::select(time, status)
-# Y <- as.matrix(Y)
-# head(Y)
-# 
-# cv.model <- cv.glmnet( X, Y, family = "cox", alpha = 1) # alpha = 1 for lasso that deals with multicplinearility
-# summary(cv.model)
-# coef(cv.model)
-# cv.model$lambda.min
-# coef(cv.model, cv.model$lambda.min)
-# coef(cv.model, cv.model$lambda.1se) # only show that has significant p value; coeff for non-significant p will be set to . by algorithm
+ 
+ dat <- rawdata %>% dplyr::select(nA, nV, nD, nQ) # , D, lengthW, secS
+ head(dat)
+ X <- as.matrix(dat)
+ head(X)
+ rawdata$time <- rawdata %>% dplyr::select(prc_act_count) # , D, lengthW, secS
+ rawdata$status <- rawdata %>% dplyr::select(event) # , D, lengthW, secS
+ Y <- rawdata %>% dplyr::select(time, status)
+ Y <- as.matrix(Y)
+ head(Y)
+ 
+ cv.model <- cv.glmnet( X, Y, family = "cox", alpha = 1) # alpha = 1 for lasso that deals with multicplinearility
+ summary(cv.model)
+ coef(cv.model)
+ cv.model$lambda.min
+ coef(cv.model, cv.model$lambda.min)
+ coef(cv.model, cv.model$lambda.1se) # only show cov. that has significant p value; coeff for non-significant p will be set to . by algorithm
